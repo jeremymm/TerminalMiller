@@ -28,18 +28,18 @@ Console::Console()
 
   //-------------------------------------------------------------------------//
   // Set handles to standard input, output and error
-  mhStdError   = GetStdHandle(STD_ERROR_HANDLE);
-  mhStdInput   = GetStdHandle(STD_INPUT_HANDLE);
-  mhStdOutput  = GetStdHandle(STD_OUTPUT_HANDLE);
+  mStdErrorHandle   = GetStdHandle(STD_ERROR_HANDLE);
+  mStdInputHandle   = GetStdHandle(STD_INPUT_HANDLE);
+  mStdOutputHandle  = GetStdHandle(STD_OUTPUT_HANDLE);
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
   // Display message box if we could not get input, output or error handles
-  if (mhStdInput  == INVALID_HANDLE_VALUE || 
-      mhStdOutput == INVALID_HANDLE_VALUE || 
-      mhStdError  == INVALID_HANDLE_VALUE ) 
+  if (mStdInputHandle  == INVALID_HANDLE_VALUE || 
+      mStdOutputHandle == INVALID_HANDLE_VALUE || 
+      mStdErrorHandle  == INVALID_HANDLE_VALUE ) 
   {
-    MessageBox(NULL, "GetStdHandle", "Console Error", MB_OK);
+    MessageBoxA(nullptr, "GetStdHandle", "Console Error", MB_OK);
   }
   //-------------------------------------------------------------------------//
 }
@@ -56,23 +56,23 @@ Console::~Console()
 //***************************************************************************//
 
 //***************************************************************************//
-void Console::SetTitle(char* cpConsoleTitle)
+void Console::SetTitle(char* title)
 {
   //-------------------------------------------------------------------------//
   // Set title of console
-  SetConsoleTitle(cpConsoleTitle);
+  SetConsoleTitleA(title);
   //-------------------------------------------------------------------------//
 }
 //***************************************************************************//
 
 //***************************************************************************//
-int Console::Read(char* cpInputbuffer, const unsigned short cusBufferSize)
+int Console::Read(char* inputBuffer, const unsigned short bufferSize)
 {
   //-------------------------------------------------------------------------//
-  // This assertaion is thrown if cusBufferSize is larger than MAX_CONSOLE_INPUT_BUFFER_SIZE
+  // This assertaion is thrown if bufferSize is larger than MAX_CONSOLE_INPUT_BUFFER_SIZE
   // The buffer size must be smaller then MAX_CONSOLE_INPUT_BUFFER_SIZE or 
   // ReadConsole will fail
-  assert(cusBufferSize <= MAX_CONSOLE_INPUT_BUFFER_SIZE);
+  assert(bufferSize <= MAX_CONSOLE_INPUT_BUFFER_SIZE);
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
@@ -83,18 +83,18 @@ int Console::Read(char* cpInputbuffer, const unsigned short cusBufferSize)
 
   //-------------------------------------------------------------------------//
   // Zero out buffer
-  memset(cpInputbuffer, 0, cusBufferSize);
+  memset(inputBuffer, 0, bufferSize);
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
   // Read from the console this function will block until the enter key is pressed
-  ReadConsole(mhStdInput, (void*)cpInputbuffer, cusBufferSize, pNumberOfBytesRead, NULL);
+  ReadConsole(mStdInputHandle, static_cast<void*>(inputBuffer), bufferSize, pNumberOfBytesRead, nullptr);
   //-------------------------------------------------------------------------//
   
   //-------------------------------------------------------------------------//
   // Store the number of bytes read in to a temp variable so that it can be returned
   // ans destroy pNumberOfBytesRead craeted above
-  int iReturnValue = (int)*pNumberOfBytesRead;
+  int iReturnValue = static_cast<int>(*pNumberOfBytesRead);
   delete pNumberOfBytesRead;
   //-------------------------------------------------------------------------//
 
@@ -106,14 +106,14 @@ int Console::Read(char* cpInputbuffer, const unsigned short cusBufferSize)
 //***************************************************************************//
 
 //***************************************************************************//
-int Console::Write(const void* cpOutputBuffer, unsigned short usBufferSize, const bool bWriteToStdError)
+int Console::Write(void const* outputBuffer, unsigned short bufferSize, const bool writeToStdError)
 {
   //-------------------------------------------------------------------------//
-  // The default of usBufferSize is zero.  If this is value passed assume a NULL
-  // terminated string is in cpOutputBuffer and set the buffer lenght to the 
+  // The default of bufferSize is zero.  If this is value passed assume a NULL
+  // terminated string is in outputBuffer and set the buffer lenght to the 
   // length of that string
-  if(usBufferSize == 0)
-    usBufferSize = (unsigned short)strlen((char*)cpOutputBuffer);
+  if(bufferSize == 0)
+    bufferSize = static_cast<unsigned short>(strlen(reinterpret_cast<char const*>(outputBuffer)));
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
@@ -122,17 +122,17 @@ int Console::Write(const void* cpOutputBuffer, unsigned short usBufferSize, cons
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
-  // If bWriteToStdError is true; write to standard error otherwise write to 
+  // If writeToStdError is true; write to standard error otherwise write to 
   // standard output
-  if(bWriteToStdError)
-    WriteConsole(mhStdOutput, cpOutputBuffer, usBufferSize, &numWritten, NULL);
+  if(writeToStdError)
+    WriteConsole(mStdOutputHandle, outputBuffer, bufferSize, &numWritten, nullptr);
   else
-    WriteConsole(mhStdError, cpOutputBuffer, usBufferSize, &numWritten, NULL);
+    WriteConsole(mStdErrorHandle, outputBuffer, bufferSize, &numWritten, nullptr);
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
   // Return the number of bytes written
-  return (int)numWritten;
+  return static_cast<int>(numWritten);
   //-------------------------------------------------------------------------//
 }
 //***************************************************************************//

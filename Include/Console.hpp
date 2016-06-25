@@ -34,21 +34,24 @@ class Console
 {
 private:
   //*************************************************************************//
-  HANDLE mhStdError;
-  HANDLE mhStdInput;
-  HANDLE mhStdOutput;
+  HANDLE mStdErrorHandle;
+  HANDLE mStdInputHandle;
+  HANDLE mStdOutputHandle;
   //*************************************************************************//
 public:
   //*************************************************************************//
   //-------------------------------------------------------------------------//
   // Constuctor/Destructor
+  // Note, the lack of virtual destructor. I do not intend for this class to be
+  // derived from. I am not using C++11's final keyword for compatiablity 
+  // reasons.
   Console();
   ~Console();
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
   // Sets the title of the Console window
-  void SetTitle(char* cpConsoleTitle);
+	static void SetTitle(char* title);
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
@@ -56,7 +59,7 @@ public:
   // to the data read from the console.  The amount of data read can be set
   // by passing it to the method via cusBufferSize.  cusBufferSize must be less 
   // than MAX_CONSOLE_INPUT_BUFFER_SIZE
-  int Read(char* cpInputbuffer, const unsigned short cusBufferSize = MAX_CONSOLE_INPUT_BUFFER_SIZE);
+  int Read(char* inputBuffer, const unsigned short bufferSize = MAX_CONSOLE_INPUT_BUFFER_SIZE);
   //-------------------------------------------------------------------------//
 
   //-------------------------------------------------------------------------//
@@ -64,7 +67,7 @@ public:
   // If usBufferSize is not specified then this method will assum the data in 
   // cpOutputBuffer is null terminated. If bWriteToStdError is true then this
   // mthod will write to standard error otherwise it will write to standard output
-  int Write(const void* cpOutputBuffer, unsigned short usBufferSize = 0, const bool bWriteToStdError = false);
+  int Write(const void* outputBuffer, unsigned short bufferSize = 0, const bool writeToStdError = false);
   //-------------------------------------------------------------------------//
   //*************************************************************************//
 };
